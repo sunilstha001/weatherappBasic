@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather app</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="main flex justify-center items-center h-screen w-screen bg-slate-500">
+        <div class="box border-2 py-5 px-3 rounded-lg bg-white flex flex-col space-y-10 ">
+            <div class="top flex justify-between space-x-8">
+                <input type="text" placeholder="Enter the city name"
+                    class="city rounded-2xl py-3 bg-slate-200 px-6 outline-none w-[14rem]">
+                <button class="search bg-slate-200 py-2 px-3 rounded-full"><i
+                        class="ri-search-2-line text-2xl"></i></button>
+            </div>
+            <div id="error-message" class="text-center text-red-500 hidden"></div>
+            <div class="mid mx-auto hidden">
+                <div class="text-center weatherIcon"><img id="weatherIcon" src="cloudy-night-svgrepo-com.svg" alt="" class="w-24 opacity-[0.7]"></div>
+                <h1 class="text-center text-3xl"><span id="temp">22</span> °c</h1>
+                <h1 id="displayCity" class="text-xl text-center">Dhading Bensi</h1>
+            </div>
+            <div class="button flex justify-between text-sm sm:text-md hidden">
+                <div class="left flex my-auto space-x-3">
+                    <img src="humidity.svg" alt="" class="w-10">
+                    <div>
+                        <h1 id="humidity">50%</h1>
+                        <p>Humidity</p>
+                    </div>
+                </div>
+                <div class="right flex my-auto space-x-3">
+                    <img src="wind.svg" alt="" class="w-10">
+                    <div>
+                        <h1 id="wind">15 km/h</h1>
+                        <p>wind speed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let search = document.querySelector(".search");
+        let humidity = document.getElementById("humidity");
+        let wind = document.getElementById("wind");
+        let temp = document.getElementById("temp");
+        let displayCity = document.getElementById("displayCity");
+        let city = document.querySelector(".city");
+        let mid = document.querySelector(".mid");
+        let button = document.querySelector(".button");
+        let weatherIcon = document.getElementById("weatherIcon");
+        let errorMessage = document.getElementById("error-message");
+
+        const weatherIcons = {
+            "Clear": "sun.svg",
+            "Clouds": "clouds.svg",
+            "Rain": "rain.svg",
+            "Drizzle": "drizzle.svg",
+            "Thunderstorm": "thunderstorm.svg",
+            "Snow": "snow.svg",
+            "Mist": "mist.svg"
+        };
+
+        search.addEventListener("click", async () => {
+            let cityName = city.value;
+            let url = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=7bfd9ba6f41b5e2f1c0b89d5d7697a36&units=metric`;
+
+            try {
+                let response = await fetch(url);
+                let data = await response.json();
+
+                if (response.ok) {
+                    console.log(data);
+                    temp.innerText = data.main.temp;
+                    displayCity.innerText = `${cityName}, ${data.sys.country}`;
+                    humidity.innerText = `${data.main.humidity}%`;
+                    wind.innerText = `${data.wind.speed} km/h`;
+                    mid.classList.remove("hidden");
+                    button.classList.remove("hidden");
+                    errorMessage.classList.add("hidden");
+
+                    const weatherMain = data.weather[0].main;
+                    if (weatherIcons[weatherMain]) {
+                        weatherIcon.src = weatherIcons[weatherMain];
+                    } else {
+                        weatherIcon.src = "default.svg"; // Default icon if the weather condition is not in the map
+                    }
+
+                } else {
+                    throw new Error(data.message);
+                }
+
+            } catch (error) {
+                console.log(error);
+                errorMessage.innerText = "ERROR: " + error.message;
+                errorMessage.classList.remove("hidden");
+                mid.classList.add("hidden");
+                button.classList.add("hidden");
+            }
+        });
+    </script>
+
+</body>
+
+</html>
